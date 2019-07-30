@@ -2,20 +2,26 @@
 from appJar import gui
 import random
 
-x = 10
-y = 20
-z = 10
+x = 30
+y = 30
+z = 100
 size = x*y-1
 booms = random.sample(range(0, size), z)
 left_boundary_checker = [-1,x,-x,x-1,-x-1]
 right_boundary_checker = [1,x,-x,x+1,-x+1]
 normal_checker = list( dict.fromkeys(left_boundary_checker + right_boundary_checker) )
 
+app = gui()
 checked = []
 #Check the surrending cells, change the current cell name to the number of booms
 #in surrending cells. if cell surrending count is 0, check the surrending cells' booms recursively
 #only check a cell once.
-
+def reset():
+    for i in range(size+1):
+        app.setButton(str(i),"   ")
+    checked[:] = []
+    
+    
 def getSurroundings(cor, checker):
     surroundings = []
     count = 0
@@ -46,8 +52,19 @@ def getSurroundBooms(cor):
             count = getSurroundings(cor, normal_checker)
         
         cors = str(cor)
-        #print(cors)
         app.setButton(cors,count)
+        app.setButtonState(cors,"disabled")
+        app.setButtonRelief(cors,"sunken")
+        if count == 1:
+            app.setButtonDisabledFg(cors, "purple")
+        elif count == 2:
+            app.setButtonDisabledFg(cors, "blue")
+        elif count == 3:
+            app.setButtonDisabledFg(cors, "green")
+        elif count == 4:
+            app.setButtonDisabledFg(cors, "orange")
+        elif count == 5:
+            app.setButtonDisabledFg(cors, "red")
         return count
 
 def checkBoom(cor):
@@ -56,16 +73,21 @@ def checkBoom(cor):
     return False
 
 def click(button):
-    print(button)
     if checkBoom(int(button)):
-        print('dead')
+        app.infoBox("DEAD", "A hero just set his foot onto a boom.", parent=None)
+        #app.stop()
     else:
         getSurroundBooms(int(button))
-app = gui()
-print(booms)
+    if len(checked)==size+1-z:
+        app.infoBox("Winner!","Winner Winner, Chiken Dinner!", parent=None)
+        
+
+    
 for i in range(y):
         for j in range(x):
-            btnname = i*x+j
-            app.addNamedButton("   ",str(btnname), click, i, j)
+            btnname = str(i*x+j)
+            app.addNamedButton("",btnname, click, i, j)
+            app.setButtonWidth(btnname, 2)
+            #app.setButtonHeight(btnname, 2)
 
 app.go()
